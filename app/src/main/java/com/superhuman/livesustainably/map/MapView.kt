@@ -27,9 +27,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.*
+import com.superhuman.livesustainably.navigation.NavBarDestination
+import com.superhuman.livesustainably.navigation.UnifiedBottomNavigationBar
+// NOTE: Google Maps SDK imports commented out - using simulated map instead
+// import com.google.android.gms.maps.model.CameraPosition
+// import com.google.android.gms.maps.model.LatLng
+// import com.google.maps.android.compose.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,13 +40,14 @@ fun MapView(
     viewModel: MapViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
     onNavigateToHome: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {},
-    onNavigateToChat: () -> Unit = {}
+    onNavigateToChat: () -> Unit = {},
+    onNavigateToLeaderboard: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
-    var useSimulatedMap by remember { mutableStateOf(false) }
+    // NOTE: Always use simulated map - Google Maps API key requirement removed
+    // var useSimulatedMap by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -71,10 +75,12 @@ fun MapView(
         },
         bottomBar = {
             if (!isLandscape) {
-                MapBottomNavigationBar(
+                UnifiedBottomNavigationBar(
+                    currentRoute = "map",
                     onNavigateToHome = onNavigateToHome,
-                    onNavigateToProfile = onNavigateToProfile,
-                    onNavigateToChat = onNavigateToChat
+                    onNavigateToChat = onNavigateToChat,
+                    onNavigateToLeaderboard = onNavigateToLeaderboard,
+                    onNavigateToProfile = { }
                 )
             }
         }
@@ -89,7 +95,8 @@ fun MapView(
                     modifier = Modifier.align(Alignment.Center),
                     color = Color(0xFF2563EB)
                 )
-            } else if (state.error != null || useSimulatedMap) {
+            } else {
+                // NOTE: Always using simulated map - Google Maps API key not required
                 if (isLandscape) {
                     Row(modifier = Modifier.fillMaxSize()) {
                         SimulatedMapContent(
@@ -108,30 +115,6 @@ fun MapView(
                     SimulatedMapContent(
                         state = state,
                         onFriendClick = { viewModel.selectFriend(it) },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            } else {
-                if (isLandscape) {
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        GoogleMapContent(
-                            state = state,
-                            onFriendClick = { viewModel.selectFriend(it) },
-                            onMapError = { useSimulatedMap = true },
-                            modifier = Modifier.weight(0.6f)
-                        )
-                        FriendsListPanel(
-                            friends = state.friends,
-                            selectedFriend = state.selectedFriend,
-                            onFriendClick = { viewModel.selectFriend(it) },
-                            modifier = Modifier.weight(0.4f)
-                        )
-                    }
-                } else {
-                    GoogleMapContent(
-                        state = state,
-                        onFriendClick = { viewModel.selectFriend(it) },
-                        onMapError = { useSimulatedMap = true },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -159,6 +142,9 @@ fun MapView(
     }
 }
 
+// NOTE: GoogleMapContent function commented out - using simulated map instead
+// Google Maps API key requirement removed
+/*
 @Composable
 fun GoogleMapContent(
     state: MapState,
@@ -224,6 +210,7 @@ fun GoogleMapContent(
         }
     }
 }
+*/
 
 @Composable
 fun SimulatedMapContent(
@@ -757,88 +744,5 @@ fun InfoChip(
     }
 }
 
-@Composable
-fun MapBottomNavigationBar(
-    onNavigateToHome: () -> Unit,
-    onNavigateToProfile: () -> Unit,
-    onNavigateToChat: () -> Unit
-) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 8.dp
-    ) {
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToHome,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home"
-                )
-            },
-            label = { Text("HOME", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = true,
-            onClick = { },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = "Map"
-                )
-            },
-            label = {
-                Text(
-                    "MAP",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFF2563EB),
-                selectedTextColor = Color(0xFF2563EB),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToChat,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "Chat"
-                )
-            },
-            label = { Text("CHAT", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToProfile,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile"
-                )
-            },
-            label = { Text("PROFILE", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-    }
-}
+// NOTE: MapBottomNavigationBar replaced with UnifiedBottomNavigationBar
+// See MapView composable for the unified navigation bar implementation

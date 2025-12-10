@@ -101,8 +101,8 @@ fun AppNavigator(navController: NavHostController, authState: AppAuthState) {
                         popUpTo(NavDestinations.Home.route) { inclusive = true }
                     }
                 },
-                onNavigateToProfile = { navController.navigate(NavDestinations.Profile.route) },
-                onNavigateToChat = { navController.navigate(NavDestinations.Chatbot.route) }
+                onNavigateToChat = { navController.navigate(NavDestinations.Chatbot.route) },
+                onNavigateToLeaderboard = { navController.navigate(NavDestinations.Leaderboard.route) }
             )
         }
 
