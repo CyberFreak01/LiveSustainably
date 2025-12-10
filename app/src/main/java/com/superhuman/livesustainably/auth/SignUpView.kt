@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -35,6 +38,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -104,6 +108,23 @@ private fun SignUpContent(
     onGoogleSignUp: () -> Unit,
     onBackToLogin: () -> Unit,
 ) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+    val isCompactHeight = screenHeight < 700.dp
+    val isCompactWidth = screenWidth < 360.dp
+    val scrollState = rememberScrollState()
+    
+    val iconSize = when {
+        isCompactHeight && isCompactWidth -> 70.dp
+        isCompactHeight -> 80.dp
+        else -> 110.dp
+    }
+    
+    val verticalSpacing = if (isCompactHeight) 8.dp else 12.dp
+    val fieldHeight = if (isCompactHeight) 52.dp else 58.dp
+    val buttonHeight = if (isCompactHeight) 48.dp else 56.dp
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,21 +133,21 @@ private fun SignUpContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .verticalScroll(scrollState)
+                .padding(horizontal = if (isCompactWidth) 16.dp else 24.dp)
                 .padding(top = 2.dp, bottom = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .padding(bottom = if (isCompactHeight) 8.dp else 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
                     Image(
-                        modifier = Modifier.size(110.dp),
+                        modifier = Modifier.size(iconSize),
                         painter = painterResource(R.drawable.app_icon),
                         contentDescription = "App Icon",
                     )
@@ -134,21 +155,21 @@ private fun SignUpContent(
                         text = "Sign Up",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = androidx.compose.ui.graphics.Color(0xFF1F2937),
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = if (isCompactHeight) 4.dp else 8.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(verticalSpacing))
 
-            // Google sign up
             SocialSignUpButton(
                 text = "Sign up with Google",
                 iconRes = R.drawable.ic_google,
                 onClick = onGoogleSignUp,
+                isCompact = isCompactHeight
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(if (isCompactHeight) 12.dp else 20.dp))
 
             Text(
                 text = "Or sign up with Email",
@@ -156,18 +177,17 @@ private fun SignUpContent(
                 color = androidx.compose.ui.graphics.Color(0xFF1F2937),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = if (isCompactHeight) 10.dp else 16.dp),
                 textAlign = TextAlign.Center
             )
 
-            // Email Field
             OutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChanged,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp),
+                    .height(fieldHeight),
                 singleLine = true,
                 isError = state.emailError != null,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
@@ -190,9 +210,8 @@ private fun SignUpContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (isCompactHeight) 10.dp else 16.dp))
 
-            // Password field
             OutlinedTextField(
                 value = state.password,
                 onValueChange = onPasswordChanged,
@@ -210,7 +229,7 @@ private fun SignUpContent(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp),
+                    .height(fieldHeight),
                 singleLine = true,
                 isError = state.passwordError != null,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
@@ -233,14 +252,13 @@ private fun SignUpContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(if (isCompactHeight) 10.dp else 16.dp))
 
-            // Sign up button
             Button(
                 onClick = onSignUpClicked,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(buttonHeight),
                 enabled = !state.isLoading,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
@@ -297,26 +315,32 @@ private fun SocialSignUpButton(
     text: String,
     iconRes: Int,
     onClick: () -> Unit,
+    isCompact: Boolean = false
 ) {
+    val buttonHeight = if (isCompact) 48.dp else 58.dp
+    val verticalPadding = if (isCompact) 4.dp else 6.dp
+    val iconSize = if (isCompact) 24.dp else 28.dp
+    val fontSize = if (isCompact) 13.sp else 14.sp
+    
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
-            .padding(vertical = 6.dp),
+            .height(buttonHeight)
+            .padding(vertical = verticalPadding),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
             containerColor = androidx.compose.ui.graphics.Color.White,
         ),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 18.dp,
-            vertical = 10.dp
+            vertical = if (isCompact) 8.dp else 10.dp
         ),
     ) {
         Image(
             painter = painterResource(id = iconRes),
             contentDescription = text,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(iconSize),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -324,7 +348,7 @@ private fun SocialSignUpButton(
             color = androidx.compose.ui.graphics.Color(0xFF1F2937),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
+                fontSize = fontSize,
                 lineHeight = 18.sp
             ),
         )

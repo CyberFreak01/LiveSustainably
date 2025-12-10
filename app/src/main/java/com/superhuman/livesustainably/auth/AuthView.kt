@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,10 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +44,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -118,6 +123,22 @@ private fun Auth(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+    val isCompactHeight = screenHeight < 700.dp
+    val isCompactWidth = screenWidth < 360.dp
+    val scrollState = rememberScrollState()
+    
+    val iconSize = when {
+        isCompactHeight && isCompactWidth -> 70.dp
+        isCompactHeight -> 80.dp
+        else -> 110.dp
+    }
+    
+    val verticalSpacing = if (isCompactHeight) 8.dp else 12.dp
+    val fieldHeight = if (isCompactHeight) 52.dp else 58.dp
+    val buttonHeight = if (isCompactHeight) 48.dp else 56.dp
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -131,42 +152,40 @@ private fun Auth(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = if (isCompactWidth) 16.dp else 24.dp)
                     .padding(top = 2.dp, bottom = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // Header with logo and language selector
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp),
+                        .padding(bottom = if (isCompactHeight) 4.dp else 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(horizontalAlignment = Alignment.Start) {
                         Image(
-                            modifier = Modifier.size(110.dp),
+                            modifier = Modifier.size(iconSize),
                             painter = painterResource(R.drawable.app_icon),
                             contentDescription = "App Icon",
                         )
-
                     }
-                    // Language selector (UK flag)
                     Image(
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(if (isCompactWidth) 26.dp else 32.dp),
                         painter = painterResource(R.drawable.ic_flag_uk),
                         contentDescription = "Language Selector",
                     )
                 }
 
-                // Social Login Buttons - Google only
                 SocialLoginButton(
                     text = "Log in with Google",
                     iconRes = R.drawable.ic_google,
                     onClick = onGoogleLoginClicked,
+                    isCompact = isCompactHeight
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(verticalSpacing))
 
                 SocialLoginButton(
                     text = "Log in with Facebook",
@@ -176,38 +195,37 @@ private fun Auth(
                             snackbarHostState.showSnackbar("Coming soon")
                         }
                     },
+                    isCompact = isCompactHeight
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(if (isCompactHeight) 12.dp else 20.dp))
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = if (isCompactHeight) 6.dp else 8.dp),
                     color = androidx.compose.ui.graphics.Color(0xFFE1E6F0),
                     thickness = 1.dp
                 )
 
-                // Sign in with Email section
                 Text(
                     text = "Sign in with Email",
                     style = MaterialTheme.typography.titleMedium,
                     color = androidx.compose.ui.graphics.Color(0xFF1F2937),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp)
-                        .padding(bottom = 16.dp),
+                        .padding(top = if (isCompactHeight) 2.dp else 4.dp)
+                        .padding(bottom = if (isCompactHeight) 10.dp else 16.dp),
                     textAlign = TextAlign.Center
                 )
 
-                // Email Field
                 OutlinedTextField(
                     value = state.email,
                     onValueChange = onEmailChanged,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(58.dp),
+                        .height(fieldHeight),
                     singleLine = true,
                     isError = state.emailError != null,
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
@@ -230,7 +248,7 @@ private fun Auth(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(if (isCompactHeight) 10.dp else 16.dp))
 
                 AnimatedVisibility(visible = state.showPasswordField) {
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -240,7 +258,7 @@ private fun Auth(
                             color = androidx.compose.ui.graphics.Color(0xFF6B7280),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 8.dp)
+                                .padding(bottom = if (isCompactHeight) 6.dp else 8.dp)
                         )
                         OutlinedTextField(
                             value = state.password,
@@ -259,7 +277,7 @@ private fun Auth(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(58.dp),
+                                .height(fieldHeight),
                             singleLine = true,
                             isError = state.passwordError != null,
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
@@ -284,12 +302,11 @@ private fun Auth(
                     }
                 }
 
-                // Sign in with Email Button
                 Button(
                     onClick = onEmailLoginClicked,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(buttonHeight),
                     enabled = !state.isLoading && state.email.isNotBlank() && state.password.isNotBlank(),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
@@ -329,16 +346,15 @@ private fun Auth(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(if (isCompactHeight) 16.dp else 24.dp))
 
-                // SSO Section
                 Text(
                     text = "Do you work for an organization that uses SSO?",
                     style = MaterialTheme.typography.bodyMedium,
                     color = androidx.compose.ui.graphics.Color(0xFF6B7280),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = if (isCompactHeight) 8.dp else 12.dp),
                 )
 
                 Button(
@@ -349,7 +365,7 @@ private fun Auth(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(buttonHeight),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                         containerColor = androidx.compose.ui.graphics.Color(0xFFF3F4F6),
@@ -365,9 +381,8 @@ private fun Auth(
                     Text("Log in with SSO", color = androidx.compose.ui.graphics.Color(0xFF1F2937))
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(if (isCompactHeight) 16.dp else 24.dp))
 
-                // Registration link
                 TextButton(
                     modifier = Modifier.padding(bottom = 12.dp),
                     onClick = { onNavigateToSignUp() }
@@ -394,26 +409,32 @@ private fun SocialLoginButton(
     text: String,
     iconRes: Int,
     onClick: () -> Unit,
+    isCompact: Boolean = false
 ) {
+    val buttonHeight = if (isCompact) 48.dp else 58.dp
+    val verticalPadding = if (isCompact) 4.dp else 6.dp
+    val iconSize = if (isCompact) 24.dp else 28.dp
+    val fontSize = if (isCompact) 13.sp else 14.sp
+    
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
-            .padding(vertical = 6.dp),
+            .height(buttonHeight)
+            .padding(vertical = verticalPadding),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
             containerColor = androidx.compose.ui.graphics.Color.White,
         ),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 18.dp,
-            vertical = 10.dp
+            vertical = if (isCompact) 8.dp else 10.dp
         ),
     ) {
         Image(
             painter = painterResource(id = iconRes),
             contentDescription = text,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(iconSize),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -421,7 +442,7 @@ private fun SocialLoginButton(
             color = androidx.compose.ui.graphics.Color(0xFF1F2937),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
+                fontSize = fontSize,
                 lineHeight = 18.sp
             ),
         )

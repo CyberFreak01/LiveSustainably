@@ -1,10 +1,13 @@
 package com.superhuman.livesustainably.feed
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,17 +17,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.superhuman.livesustainably.R
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,49 +41,177 @@ fun FeedView(
     onNavigateBack: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Stories",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color(0xFF1F2937),
-                    navigationIconContentColor = Color(0xFF1F2937)
-                )
-            )
+    val listState = rememberLazyListState()
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+    
+    val scrollOffset = remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                1000f
+            }
         }
-    ) { paddingValues ->
-        LazyColumn(
+    }
+    
+    val expandedHeight = 120.dp
+    val collapsedHeight = 64.dp
+    val collapseThreshold = (expandedHeight - collapsedHeight).value.coerceAtLeast(1f)
+    
+    val collapseProgress by animateFloatAsState(
+        targetValue = (scrollOffset.value / collapseThreshold).coerceIn(0f, 1f),
+        label = "collapseProgress"
+    )
+    
+    val isCollapsed = collapseProgress > 0.7f
+    val isCompact = screenWidth < 360.dp
+
+    Scaffold { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF9FAFB)),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(state.feedItems) { feedItem ->
-                FeedCard(
-                    feedItem = feedItem,
-                    onLikeClick = { viewModel.toggleLike(feedItem.id) },
-                    onCommentClick = { viewModel.toggleCommentSection(feedItem.id) },
-                    onCommentSubmit = { comment ->
-                        viewModel.addComment(feedItem.id, comment)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF9FAFB)),
+                contentPadding = PaddingValues(
+                    top = expandedHeight + 16.dp,
+                    bottom = 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(state.feedItems) { feedItem ->
+                    FeedCard(
+                        feedItem = feedItem,
+                        onLikeClick = { viewModel.toggleLike(feedItem.id) },
+                        onCommentClick = { viewModel.toggleCommentSection(feedItem.id) },
+                        onCommentSubmit = { comment ->
+                            viewModel.addComment(feedItem.id, comment)
+                        },
+                        isCompact = isCompact
+                    )
+                }
+            }
+            
+            StoriesAppBar(
+                onNavigateBack = onNavigateBack,
+                collapseProgress = collapseProgress,
+                isCollapsed = isCollapsed,
+                expandedHeight = expandedHeight,
+                collapsedHeight = collapsedHeight,
+                isCompact = isCompact
+            )
+        }
+    }
+}
+
+@Composable
+fun StoriesAppBar(
+    onNavigateBack: () -> Unit,
+    collapseProgress: Float,
+    isCollapsed: Boolean,
+    expandedHeight: Dp,
+    collapsedHeight: Dp,
+    isCompact: Boolean
+) {
+    val currentHeight by animateDpAsState(
+        targetValue = if (isCollapsed) collapsedHeight else expandedHeight,
+        label = "headerHeight"
+    )
+    
+    val cornerRadius by animateDpAsState(
+        targetValue = if (isCollapsed) 20.dp else 28.dp,
+        label = "cornerRadius"
+    )
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(currentHeight)
+            .clip(
+                RoundedCornerShape(
+                    bottomStart = cornerRadius,
+                    bottomEnd = cornerRadius
+                )
+            )
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF2563EB),
+                        Color(0xFF1D4ED8)
+                    )
+                )
+            )
+    ) {
+        if (isCollapsed) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+                
+                Text(
+                    text = "Stories",
+                    fontSize = if (isCompact) 18.sp else 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .graphicsLayer {
+                        alpha = 1f - collapseProgress
                     }
+            ) {
+                Spacer(modifier = Modifier.height(if (isCompact) 12.dp else 16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    Text(
+                        text = "Stories",
+                        fontSize = if (isCompact) 24.sp else 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Read and share sustainability stories",
+                    fontSize = if (isCompact) 14.sp else 16.sp,
+                    color = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.padding(start = 48.dp)
                 )
             }
         }
@@ -87,46 +223,45 @@ fun FeedCard(
     feedItem: FeedItem,
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,
-    onCommentSubmit: (String) -> Unit
+    onCommentSubmit: (String) -> Unit,
+    isCompact: Boolean = false
 ) {
     var commentText by remember { mutableStateOf("") }
+    
+    val horizontalPadding = if (isCompact) 12.dp else 16.dp
+    val contentPadding = if (isCompact) 12.dp else 16.dp
+    val avatarSize = if (isCompact) 36.dp else 40.dp
+    val titleSize = if (isCompact) 16.sp else 18.sp
+    val imageHeight = if (isCompact) 180.dp else 220.dp
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = horizontalPadding),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Header: Author Info
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(contentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Author Avatar
                 if (feedItem.authorAvatar.isNotEmpty()) {
                     AsyncImage(
                         model = feedItem.authorAvatar,
                         contentDescription = "Author Avatar",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(avatarSize)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(avatarSize)
                             .clip(CircleShape)
                             .background(Color(0xFF2563EB)),
                         contentAlignment = Alignment.Center
@@ -135,85 +270,83 @@ fun FeedCard(
                             text = feedItem.authorName.first().uppercase(),
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = if (isCompact) 16.sp else 18.sp
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(if (isCompact) 10.dp else 12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = feedItem.authorName,
-                        fontSize = 16.sp,
+                        fontSize = if (isCompact) 14.sp else 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF1F2937)
                     )
                     Text(
                         text = feedItem.timestamp,
-                        fontSize = 13.sp,
+                        fontSize = if (isCompact) 12.sp else 13.sp,
                         color = Color(0xFF9CA3AF)
                     )
                 }
 
-                // Category Badge
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = getCategoryColor(feedItem.category)
                 ) {
                     Text(
                         text = feedItem.category,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        fontSize = 12.sp,
+                        modifier = Modifier.padding(
+                            horizontal = if (isCompact) 10.dp else 12.dp,
+                            vertical = if (isCompact) 4.dp else 6.dp
+                        ),
+                        fontSize = if (isCompact) 11.sp else 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
                 }
             }
 
-            // Title
             Text(
                 text = feedItem.title,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                fontSize = 18.sp,
+                modifier = Modifier.padding(horizontal = contentPadding),
+                fontSize = titleSize,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1F2937)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Description
             Text(
                 text = feedItem.description,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                fontSize = 15.sp,
+                modifier = Modifier.padding(horizontal = contentPadding),
+                fontSize = if (isCompact) 14.sp else 15.sp,
                 color = Color(0xFF4B5563),
-                lineHeight = 22.sp,
+                lineHeight = if (isCompact) 20.sp else 22.sp,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Image
             if (feedItem.imageUrl.isNotEmpty()) {
                 AsyncImage(
                     model = feedItem.imageUrl,
                     contentDescription = feedItem.title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
-                        .padding(horizontal = 16.dp)
+                        .height(imageHeight)
+                        .padding(horizontal = contentPadding)
                         .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // Placeholder image
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
-                        .padding(horizontal = 16.dp)
+                        .height(imageHeight)
+                        .padding(horizontal = contentPadding)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFE5E7EB)),
                     contentAlignment = Alignment.Center
@@ -221,7 +354,7 @@ fun FeedCard(
                     Icon(
                         painter = painterResource(id = R.drawable.image),
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(if (isCompact) 40.dp else 48.dp),
                         tint = Color(0xFF9CA3AF)
                     )
                 }
@@ -230,18 +363,16 @@ fun FeedCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = contentPadding),
                 color = Color(0xFFE5E7EB)
             )
 
-            // Action Buttons: Like, Comment
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Like Button
                 TextButton(
                     onClick = onLikeClick,
                     modifier = Modifier.weight(1f)
@@ -250,18 +381,17 @@ fun FeedCard(
                         imageVector = if (feedItem.isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = "Like",
                         tint = if (feedItem.isLiked) Color(0xFFEF4444) else Color(0xFF6B7280),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(if (isCompact) 18.dp else 20.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(if (isCompact) 4.dp else 8.dp))
                     Text(
                         text = "${feedItem.likeCount} Likes",
-                        fontSize = 15.sp,
+                        fontSize = if (isCompact) 13.sp else 15.sp,
                         color = if (feedItem.isLiked) Color(0xFFEF4444) else Color(0xFF6B7280),
                         fontWeight = if (feedItem.isLiked) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
 
-                // Comment Button
                 TextButton(
                     onClick = onCommentClick,
                     modifier = Modifier.weight(1f)
@@ -270,35 +400,30 @@ fun FeedCard(
                         painter = painterResource(id = R.drawable.chat_bubble),
                         contentDescription = "Comment",
                         tint = if (feedItem.showCommentSection) Color(0xFF2563EB) else Color(0xFF6B7280),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(if (isCompact) 18.dp else 20.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(if (isCompact) 4.dp else 8.dp))
                     Text(
                         text = "${feedItem.comments.size} Comments",
-                        fontSize = 15.sp,
+                        fontSize = if (isCompact) 13.sp else 15.sp,
                         color = if (feedItem.showCommentSection) Color(0xFF2563EB) else Color(0xFF6B7280),
                         fontWeight = if (feedItem.showCommentSection) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
             }
 
-            // Comments Section
             if (feedItem.showCommentSection) {
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = contentPadding),
                     color = Color(0xFFE5E7EB)
                 )
 
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    // Display existing comments
+                Column(modifier = Modifier.padding(contentPadding)) {
                     feedItem.comments.forEach { comment ->
-                        CommentItem(comment = comment)
+                        CommentItem(comment = comment, isCompact = isCompact)
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 
-                    // Add Comment Input
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -341,15 +466,16 @@ fun FeedCard(
 }
 
 @Composable
-fun CommentItem(comment: Comment) {
+fun CommentItem(comment: Comment, isCompact: Boolean = false) {
+    val avatarSize = if (isCompact) 28.dp else 32.dp
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
-        // Commenter Avatar
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .size(avatarSize)
                 .clip(CircleShape)
                 .background(Color(0xFF10B981)),
             contentAlignment = Alignment.Center
@@ -358,35 +484,33 @@ fun CommentItem(comment: Comment) {
                 text = comment.authorName.first().uppercase(),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = if (isCompact) 12.sp else 14.sp
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(if (isCompact) 10.dp else 12.dp))
 
         Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = comment.authorName,
-                    fontSize = 14.sp,
+                    fontSize = if (isCompact) 13.sp else 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF1F2937)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = comment.timestamp,
-                    fontSize = 12.sp,
+                    fontSize = if (isCompact) 11.sp else 12.sp,
                     color = Color(0xFF9CA3AF)
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = comment.text,
-                fontSize = 14.sp,
+                fontSize = if (isCompact) 13.sp else 14.sp,
                 color = Color(0xFF4B5563),
-                lineHeight = 20.sp
+                lineHeight = if (isCompact) 18.sp else 20.sp
             )
         }
     }
@@ -402,10 +526,6 @@ fun getCategoryColor(category: String): Color {
         else -> Color(0xFF6B7280)
     }
 }
-
-// ============================================
-// Data Classes
-// ============================================
 
 data class Comment(
     val id: String,

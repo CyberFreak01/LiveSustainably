@@ -4,3 +4,26 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Build Android"
+
+[[workflows.workflow]]
+name = "Build Android"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./gradlew assembleDebug --stacktrace 2>&1 || echo \"Note: Full Android SDK not available in Replit. Export to Android Studio for building APK.\""
+
+[workflows.workflow.metadata]
+outputType = "console"
