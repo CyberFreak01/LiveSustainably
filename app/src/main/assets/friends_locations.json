@@ -1,0 +1,74 @@
+{
+  "friends": [
+    {
+      "id": "friend_1",
+      "name": "Emma Wilson",
+      "username": "@emmaw",
+      "avatarUrl": "https://i.pravatar.cc/150?img=1",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "lastActive": "2 min ago",
+      "status": "active",
+      "activity": "Walking in the park"
+    },
+    {
+      "id": "friend_2",
+      "name": "James Chen",
+      "username": "@jameschen",
+      "avatarUrl": "https://i.pravatar.cc/150?img=3",
+      "latitude": 51.5094,
+      "longitude": -0.1258,
+      "lastActive": "5 min ago",
+      "status": "active",
+      "activity": "Cycling to work"
+    },
+    {
+      "id": "friend_3",
+      "name": "Sophie Brown",
+      "username": "@sophieb",
+      "avatarUrl": "https://i.pravatar.cc/150?img=5",
+      "latitude": 51.5054,
+      "longitude": -0.1298,
+      "lastActive": "10 min ago",
+      "status": "active",
+      "activity": "At eco-cafe"
+    },
+    {
+      "id": "friend_4",
+      "name": "Lucas Miller",
+      "username": "@lucasm",
+      "avatarUrl": "https://i.pravatar.cc/150?img=8",
+      "latitude": 51.5084,
+      "longitude": -0.1238,
+      "lastActive": "15 min ago",
+      "status": "active",
+      "activity": "Community garden"
+    },
+    {
+      "id": "friend_5",
+      "name": "Olivia Davis",
+      "username": "@oliviad",
+      "avatarUrl": "https://i.pravatar.cc/150?img=9",
+      "latitude": 51.5104,
+      "longitude": -0.1318,
+      "lastActive": "20 min ago",
+      "status": "away",
+      "activity": "Yoga session"
+    },
+    {
+      "id": "friend_6",
+      "name": "Noah Garcia",
+      "username": "@noahg",
+      "avatarUrl": "https://i.pravatar.cc/150?img=11",
+      "latitude": 51.5034,
+      "longitude": -0.1248,
+      "lastActive": "25 min ago",
+      "status": "active",
+      "activity": "Farmers market"
+    }
+  ],
+  "userLocation": {
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  }
+}

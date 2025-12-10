@@ -1,0 +1,75 @@
+{
+  "greetings": [
+    "Hello! I'm your sustainability assistant. How can I help you live more sustainably today?",
+    "Hi there! Ready to make eco-friendly choices? Ask me anything!",
+    "Welcome! I'm here to help you on your sustainability journey."
+  ],
+  "categories": {
+    "recycling": {
+      "keywords": ["recycle", "recycling", "waste", "trash", "garbage", "bin", "dispose"],
+      "responses": [
+        "Great question about recycling! Remember to rinse containers before recycling, and check your local guidelines for what can be recycled.",
+        "Recycling tip: Flatten cardboard boxes to save space and make recycling more efficient!",
+        "Did you know? Glass can be recycled indefinitely without losing quality. Always recycle your glass bottles and jars!"
+      ]
+    },
+    "energy": {
+      "keywords": ["energy", "electricity", "power", "solar", "light", "heating", "cooling"],
+      "responses": [
+        "To save energy, try switching to LED bulbs - they use 75% less energy than incandescent bulbs!",
+        "Unplug electronics when not in use. Even in standby mode, they consume phantom energy.",
+        "Consider renewable energy options like solar panels. Many areas offer incentives for installation!"
+      ]
+    },
+    "water": {
+      "keywords": ["water", "shower", "bath", "drinking", "tap", "faucet"],
+      "responses": [
+        "Taking shorter showers can save up to 150 gallons of water per month!",
+        "Fix leaky faucets promptly - a dripping tap can waste over 3,000 gallons per year.",
+        "Collect rainwater for watering plants. It's free and better for your garden!"
+      ]
+    },
+    "food": {
+      "keywords": ["food", "eat", "diet", "vegetarian", "vegan", "organic", "local", "meal"],
+      "responses": [
+        "Eating locally-sourced food reduces carbon emissions from transportation. Visit your local farmers market!",
+        "Reducing meat consumption even one day a week can significantly lower your carbon footprint.",
+        "Plan your meals to reduce food waste. About 30-40% of food in the US is wasted!"
+      ]
+    },
+    "transport": {
+      "keywords": ["car", "drive", "transport", "commute", "bike", "walk", "bus", "train"],
+      "responses": [
+        "Biking or walking for short trips is great for your health and the environment!",
+        "Carpooling reduces emissions and saves money on fuel and parking.",
+        "Public transportation can reduce your carbon footprint by up to 45% compared to driving alone."
+      ]
+    },
+    "shopping": {
+      "keywords": ["buy", "shop", "shopping", "purchase", "product", "clothing", "fashion"],
+      "responses": [
+        "Choose products with minimal packaging to reduce waste.",
+        "Buy second-hand when possible. Thrift stores have great finds and you're helping reduce textile waste!",
+        "Look for eco-certifications like Energy Star, Fair Trade, or organic labels when shopping."
+      ]
+    },
+    "tips": {
+      "keywords": ["tip", "tips", "advice", "help", "suggestion", "how", "what"],
+      "responses": [
+        "Start small! Pick one sustainable habit and build from there.",
+        "Keep a reusable water bottle and shopping bags with you at all times.",
+        "Join local environmental groups to stay motivated and learn from others."
+      ]
+    }
+  },
+  "fallback": [
+    "That's an interesting question! While I don't have a specific answer, I encourage you to research sustainable options for that topic.",
+    "I'm still learning! Try asking about recycling, energy saving, water conservation, sustainable food, or eco-friendly transportation.",
+    "Great curiosity! For more detailed information on that topic, check out environmental websites or your local sustainability resources."
+  ],
+  "encouragement": [
+    "You're doing great on your sustainability journey!",
+    "Every small action counts towards a healthier planet!",
+    "Keep up the amazing work for our environment!"
+  ]
+}

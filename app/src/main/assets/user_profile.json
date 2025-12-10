@@ -1,0 +1,76 @@
+{
+  "user": {
+    "id": "user_001",
+    "firstName": "Alex",
+    "lastName": "Johnson",
+    "email": "alex.johnson@email.com",
+    "username": "@alexj",
+    "avatarUrl": "https://i.pravatar.cc/150?img=12",
+    "bio": "Passionate about sustainable living and making a positive impact on our planet.",
+    "location": "London, UK",
+    "joinDate": "2024-01-15",
+    "stats": {
+      "streakCount": 15,
+      "starCount": 120,
+      "roseCount": 45,
+      "totalXP": 2450,
+      "activitiesCompleted": 87,
+      "co2Saved": "125 kg"
+    }
+  },
+  "preferences": {
+    "notifications": {
+      "dailyReminders": true,
+      "achievementAlerts": true,
+      "friendActivity": true,
+      "weeklyDigest": false,
+      "pushNotifications": true
+    },
+    "privacy": {
+      "showOnMap": true,
+      "shareActivity": true,
+      "publicProfile": true,
+      "showOnLeaderboard": true
+    },
+    "display": {
+      "darkMode": false,
+      "language": "English",
+      "units": "Metric"
+    },
+    "sustainability": {
+      "primaryGoals": ["Reduce carbon footprint", "Zero waste lifestyle"],
+      "interests": ["Cycling", "Organic food", "Renewable energy", "Recycling"],
+      "dietaryPreference": "Flexitarian"
+    }
+  },
+  "achievements": [
+    {
+      "id": "ach_1",
+      "title": "First Steps",
+      "description": "Complete your first activity",
+      "icon": "🌱",
+      "earnedDate": "2024-01-16"
+    },
+    {
+      "id": "ach_2",
+      "title": "Week Warrior",
+      "description": "Maintain a 7-day streak",
+      "icon": "🔥",
+      "earnedDate": "2024-01-22"
+    },
+    {
+      "id": "ach_3",
+      "title": "Eco Champion",
+      "description": "Save 100kg of CO2",
+      "icon": "🏆",
+      "earnedDate": "2024-02-15"
+    },
+    {
+      "id": "ach_4",
+      "title": "Social Butterfly",
+      "description": "Connect with 10 friends",
+      "icon": "🦋",
+      "earnedDate": "2024-03-01"
+    }
+  ]
+}

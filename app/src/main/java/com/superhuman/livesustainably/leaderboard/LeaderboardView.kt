@@ -30,21 +30,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.superhuman.livesustainably.R
+import com.superhuman.livesustainably.navigation.NavBarDestination
+import com.superhuman.livesustainably.navigation.UnifiedBottomNavigationBar
 
 @Composable
 fun LeaderboardView(
     viewModel: LeaderboardViewModel = hiltViewModel(),
     onNavigateToHome: () -> Unit = {},
-    onNavigateToMissions: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
-            LeaderboardBottomNavigationBar(
+            UnifiedBottomNavigationBar(
+                currentRoute = NavBarDestination.Leaderboard.route,
                 onNavigateToHome = onNavigateToHome,
-                onNavigateToMissions = onNavigateToMissions,
+                onNavigateToChat = onNavigateToChat,
+                onNavigateToLeaderboard = { },
                 onNavigateToProfile = onNavigateToProfile
             )
         }
@@ -453,109 +457,6 @@ fun LeaderboardPlayerItem(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF1F2937)
-        )
-    }
-}
-
-@Composable
-fun LeaderboardBottomNavigationBar(
-    onNavigateToHome: () -> Unit,
-    onNavigateToMissions: () -> Unit,
-    onNavigateToProfile: () -> Unit
-) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 8.dp
-    ) {
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToHome,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home"
-                )
-            },
-            label = {
-                Text(
-                    text = "HOME",
-                    fontSize = 11.sp
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToMissions,
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.missions),
-                    contentDescription = "Missions",
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            label = {
-                Text(
-                    text = "MISSIONS",
-                    fontSize = 11.sp
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = true,
-            onClick = { },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.finishflag),
-                    contentDescription = "Leaderboard",
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            label = {
-                Text(
-                    text = "LEADERBOARD",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFF2563EB),
-                selectedTextColor = Color(0xFF2563EB),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToProfile,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile"
-                )
-            },
-            label = {
-                Text(
-                    text = "PROFILE",
-                    fontSize = 11.sp
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
         )
     }
 }

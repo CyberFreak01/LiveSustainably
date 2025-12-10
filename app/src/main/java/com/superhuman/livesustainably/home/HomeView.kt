@@ -31,19 +31,30 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superhuman.livesustainably.R
+import com.superhuman.livesustainably.navigation.NavBarDestination
+import com.superhuman.livesustainably.navigation.UnifiedBottomNavigationBar
 
 @Composable
 fun HomeView(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToActivity: (String) -> Unit = {},
     onNavigateToLeaderboard: () -> Unit = {},
-    onNavigateToFeed: () -> Unit = {}
+    onNavigateToFeed: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToMap: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(onNavigateToLeaderboard = onNavigateToLeaderboard)
+            UnifiedBottomNavigationBar(
+                currentRoute = NavBarDestination.Home.route,
+                onNavigateToHome = { },
+                onNavigateToChat = onNavigateToChat,
+                onNavigateToLeaderboard = onNavigateToLeaderboard,
+                onNavigateToProfile = onNavigateToProfile
+            )
         }
     ) { paddingValues ->
         Column(
@@ -73,7 +84,8 @@ fun HomeView(
             TodaysActivitiesSection(
                 activities = state.activities,
                 onActivityClick = onNavigateToActivity,
-                onNavigateToFeed = onNavigateToFeed
+                onNavigateToFeed = onNavigateToFeed,
+                onNavigateToMap = onNavigateToMap
             )
         }
     }
@@ -341,7 +353,8 @@ fun StreakDayItem(
 fun TodaysActivitiesSection(
     activities: List<Activity>,
     onActivityClick: (String) -> Unit,
-    onNavigateToFeed: () -> Unit = {}
+    onNavigateToFeed: () -> Unit = {},
+    onNavigateToMap: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -371,10 +384,10 @@ fun TodaysActivitiesSection(
                             activity = activity,
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                if (activity.id == "stories") {
-                                    onNavigateToFeed()
-                                } else {
-                                    onActivityClick(activity.id)
+                                when (activity.id) {
+                                    "stories" -> onNavigateToFeed()
+                                    "mobility" -> onNavigateToMap()
+                                    else -> onActivityClick(activity.id)
                                 }
                             }
                         )
@@ -516,104 +529,4 @@ fun ActivityCard(
 
     }
 }
-@Composable
-fun BottomNavigationBar(onNavigateToLeaderboard: () -> Unit) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 8.dp
-    ) {
-        NavigationBarItem(
-            selected = true,
-            onClick = { },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home"
-                )
-            },
-            label = {
-                Text(
-                    text = "HOME",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFF2563EB),
-                selectedTextColor = Color(0xFF2563EB),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.missions),
-                    contentDescription = "Missions",
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            label = {
-                Text(
-                    text = "MISSIONS",
-                    fontSize = 11.sp
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = true,
-            onClick = { onNavigateToLeaderboard() },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.finishflag),
-                    contentDescription = "Leaderboard",
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            label = {
-                Text(
-                    text = "LEADERBOARD",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color(0xFF2563EB),
-                selectedTextColor = Color(0xFF2563EB),
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = { },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile"
-                )
-            },
-            label = {
-                Text(
-                    text = "PROFILE",
-                    fontSize = 11.sp
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
-                indicatorColor = Color.Transparent
-            )
-        )
-    }
-}
-
 // Note: Data classes are defined in HomeViewModel.kt to avoid duplication
