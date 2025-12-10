@@ -1,0 +1,80 @@
+{
+  "league": {
+    "name": "Determined Seed",
+    "subtitle": "The top 7 advance to the next League",
+    "timeRemaining": "05D 15h",
+    "lockedLeagues": 4
+  },
+  "players": [
+    {
+      "id": "1",
+      "position": 1,
+      "username": "ksiyabi4",
+      "avatarUrl": "",
+      "countryFlag": "🇮🇳",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "2",
+      "position": 1,
+      "username": "sgsbpijd-64225d",
+      "avatarUrl": "",
+      "countryFlag": "🇺🇸",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "3",
+      "position": 1,
+      "username": "ihmgvgsg-663b57",
+      "avatarUrl": "",
+      "countryFlag": "🇬🇧",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "4",
+      "position": 2,
+      "username": "cristina-1e51cb",
+      "avatarUrl": "",
+      "countryFlag": "🇧🇷",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "5",
+      "position": 1,
+      "username": "zohaib-046018",
+      "avatarUrl": "",
+      "countryFlag": "🇵🇰",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "6",
+      "position": 1,
+      "username": "zohaib-046018",
+      "avatarUrl": "",
+      "countryFlag": "🇵🇰",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    },
+    {
+      "id": "7",
+      "position": 1,
+      "username": "zohaib-046018",
+      "avatarUrl": "",
+      "countryFlag": "🇵🇰",
+      "roseCount": 20,
+      "xp": 0,
+      "isFollowing": false
+    }
+  ]
+}

@@ -93,6 +93,9 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization)
+    implementation("io.coil-kt:coil-compose:2.5.0") // For AsyncImage
+    implementation("com.google.code.gson:gson:2.10.1") // For JSON parsing
+
 
     // Data Storage - Jetpack DataStore and Encrypted Preferences
     implementation(libs.androidx.datastore.preferences)

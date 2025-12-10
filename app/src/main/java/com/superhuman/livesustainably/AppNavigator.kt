@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.superhuman.livesustainably.auth.AuthView
 import com.superhuman.livesustainably.auth.SignUpView
 import com.superhuman.livesustainably.home.HomeView
+import com.superhuman.livesustainably.leaderboard.LeaderboardView
 
 sealed class AppAuthState {
     object Loading : AppAuthState()
@@ -18,6 +19,7 @@ sealed class NavDestinations(val route: String) {
     object Login : NavDestinations("login")
     object SignUp : NavDestinations("signup")
     object Home : NavDestinations("home")
+    object Leaderboard : NavDestinations("leaderboard")
 }
 
 @Composable
@@ -44,7 +46,18 @@ fun AppNavigator(navController: NavHostController, authState: AppAuthState) {
         }
 
         composable(NavDestinations.Home.route) {
-            HomeView()
+            HomeView(
+                onNavigateToLeaderboard = {
+                    navController.navigate(NavDestinations.Leaderboard.route)
+                }
+            )
+        }
+        composable(NavDestinations.Leaderboard.route) {
+            LeaderboardView(
+                onNavigateToHome = { navController.navigate(NavDestinations.Home.route) },
+                onNavigateToMissions = { navController.navigate(NavDestinations.Leaderboard.route) },
+                onNavigateToProfile = { /* TODO: Add profile screen */ }
+            )
         }
     }
 }

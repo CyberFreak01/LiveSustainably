@@ -35,13 +35,14 @@ import com.superhuman.livesustainably.R
 @Composable
 fun HomeView(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToActivity: (String) -> Unit = {}
+    onNavigateToActivity: (String) -> Unit = {},
+    onNavigateToLeaderboard: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(onNavigateToLeaderboard = onNavigateToLeaderboard)
         }
     ) { paddingValues ->
         Column(
@@ -101,7 +102,7 @@ fun HeaderSection(
                 )
             )
     )
- {
+    {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -145,7 +146,7 @@ fun HeaderSection(
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Left,
-                    lineHeight = 28.sp,
+                    lineHeight = 28.sp
 //                    modifier = Modifier.widthIn(max = 220.dp)
                 )
             }
@@ -391,7 +392,7 @@ fun ActivityCard(
     Card(
         onClick = onClick,
         modifier = modifier
-            .height(180.dp),
+            .height(200.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -401,99 +402,89 @@ fun ActivityCard(
         )
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .clip(RoundedCornerShape(24.dp))
+            modifier = Modifier.fillMaxSize()
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(16.dp)
             ) {
-
-                // ---------- HEADER ROW ----------
+                // Header with icon and notification dot
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-
-                    // Left circular icon
+                    // Activity icon background
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFFF6ED)),
+                            .background(Color(0xFFF3F4F6)),
                         contentAlignment = Alignment.Center
                     ) {
+                        // Note: Add activity icons to res/drawable
+                        // For now using placeholder
                         Image(
                             painter = painterResource(id = activity.iconRes),
                             contentDescription = activity.title,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Title
-                    Text(
-                        text = activity.title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    // Notification Dot
+                    // Notification dot
                     if (activity.hasNotification) {
                         Box(
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(12.dp)
                                 .clip(CircleShape)
                                 .background(Color(0xFFEF4444))
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = activity.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1F2937)
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Activity Image
+                Image(
+                    painter = painterResource(id = activity.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
             }
 
-            // ---------- BOTTOM-LEFT IMAGE (2/3 visible) ----------
-            Image(
-                painter = painterResource(id = activity.imageRes),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(120.dp)
-                    .align(Alignment.BottomStart)
-                    .offset(x = (-20).dp, y = 20.dp)  // pushes image partially outside (like screenshot)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-
-            // ---------- XP BADGE OVERLAY ----------
+            // XP Badge at bottom
             Surface(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .offset(x = 60.dp, y = (-10).dp), // overlaps image bottom-right
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF0EA5E9),
-                shadowElevation = 6.dp
+                color = Color(0xFF2563EB)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Text(
-                        text = "+${activity.xp} XP",
+                        text = "+${activity.xp} xp",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
+                    Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         contentDescription = null,
@@ -503,12 +494,11 @@ fun ActivityCard(
                 }
             }
         }
-
     }
 }
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(onNavigateToLeaderboard: () -> Unit) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp
@@ -560,8 +550,8 @@ fun BottomNavigationBar() {
         )
 
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = true,
+            onClick = { onNavigateToLeaderboard() },
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.finishflag),
@@ -572,12 +562,13 @@ fun BottomNavigationBar() {
             label = {
                 Text(
                     text = "LEADERBOARD",
-                    fontSize = 11.sp
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
                 )
             },
             colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = Color(0xFF9CA3AF),
-                unselectedTextColor = Color(0xFF9CA3AF),
+                selectedIconColor = Color(0xFF2563EB),
+                selectedTextColor = Color(0xFF2563EB),
                 indicatorColor = Color.Transparent
             )
         )
