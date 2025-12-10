@@ -6,8 +6,16 @@ This is a native Android application built with Kotlin and Jetpack Compose. It's
 - Feed/content discovery
 - Chatbot functionality
 - Leaderboard system
-- Google Maps integration
+- Simulated Map (no API required)
 - User profiles
+- Sustainability Report Dashboard
+
+## Recent Changes (December 2025)
+1. **Auth Screen**: Removed Apple signup button, added "Coming soon" snackbar for Facebook/SSO
+2. **Home Screen**: Made START button interactive - navigates to first incomplete activity
+3. **Leaderboard**: Made scrollable with LazyColumn, loads from JSON, expanded to 20 players
+4. **Report Dashboard**: New page with weekly/monthly CO2 summaries, charts, and metrics
+5. **Map View**: Replaced Google Maps with simulated map (no API key needed)
 
 ## Tech Stack
 - **Language**: Kotlin

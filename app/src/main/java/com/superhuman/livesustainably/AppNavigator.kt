@@ -12,6 +12,7 @@ import com.superhuman.livesustainably.home.HomeView
 import com.superhuman.livesustainably.leaderboard.LeaderboardView
 import com.superhuman.livesustainably.map.MapView
 import com.superhuman.livesustainably.profile.ProfileView
+import com.superhuman.livesustainably.report.ReportView
 
 sealed class AppAuthState {
     object Loading : AppAuthState()
@@ -28,6 +29,7 @@ sealed class NavDestinations(val route: String) {
     object Map : NavDestinations("map")
     object Chatbot : NavDestinations("chatbot")
     object Profile : NavDestinations("profile")
+    object Report : NavDestinations("report")
 }
 
 @Composable
@@ -127,11 +129,18 @@ fun AppNavigator(navController: NavHostController, authState: AppAuthState) {
                 },
                 onNavigateToChat = { navController.navigate(NavDestinations.Chatbot.route) },
                 onNavigateToLeaderboard = { navController.navigate(NavDestinations.Leaderboard.route) },
+                onNavigateToReport = { navController.navigate(NavDestinations.Report.route) },
                 onLogout = {
                     navController.navigate(NavDestinations.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable(NavDestinations.Report.route) {
+            ReportView(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

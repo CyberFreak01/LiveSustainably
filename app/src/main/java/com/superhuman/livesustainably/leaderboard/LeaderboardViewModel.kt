@@ -1,9 +1,12 @@
 package com.superhuman.livesustainably.leaderboard
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,8 +14,33 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class LeaderboardJsonData(
+    val league: LeagueData,
+    val players: List<LeaderboardPlayerJson>
+)
+
+data class LeagueData(
+    val name: String,
+    val subtitle: String,
+    val timeRemaining: String,
+    val lockedLeagues: Int
+)
+
+data class LeaderboardPlayerJson(
+    val id: String,
+    val position: Int,
+    val username: String,
+    val avatarUrl: String,
+    val countryFlag: String,
+    val roseCount: Int,
+    val xp: Int,
+    val isFollowing: Boolean
+)
+
 @HiltViewModel
-class LeaderboardViewModel @Inject constructor() : ViewModel() {
+class LeaderboardViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     private val _state = MutableStateFlow(LeaderboardState())
     val state: StateFlow<LeaderboardState> = _state.asStateFlow()
@@ -25,14 +53,44 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Load mock data from JSON
-            val mockPlayers = getMockLeaderboardData()
+            try {
+                val jsonString = context.assets.open("leaderboard_mock.json")
+                    .bufferedReader()
+                    .use { it.readText() }
 
-            _state.update {
-                it.copy(
-                    players = mockPlayers,
-                    isLoading = false
-                )
+                val gson = Gson()
+                val data = gson.fromJson(jsonString, LeaderboardJsonData::class.java)
+
+                val players = data.players.map { player ->
+                    LeaderboardPlayer(
+                        id = player.id,
+                        position = player.position,
+                        username = player.username,
+                        avatarUrl = player.avatarUrl,
+                        countryFlag = player.countryFlag,
+                        roseCount = player.roseCount,
+                        xp = player.xp,
+                        isFollowing = player.isFollowing
+                    )
+                }
+
+                _state.update {
+                    it.copy(
+                        leagueName = data.league.name,
+                        leagueSubtitle = data.league.subtitle,
+                        timeRemaining = data.league.timeRemaining,
+                        lockedLeagues = data.league.lockedLeagues,
+                        players = players,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        players = emptyList(),
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -49,61 +107,5 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
                 }
             )
         }
-    }
-
-    private fun getMockLeaderboardData(): List<LeaderboardPlayer> {
-        // This would normally load from assets/leaderboard_mock.json
-        return listOf(
-            LeaderboardPlayer(
-                id = "1",
-                position = 1,
-                username = "ksiyabi4",
-                avatarUrl = "", // Will use placeholder
-                countryFlag = "🇮🇳",
-                roseCount = 20,
-                xp = 0,
-                isFollowing = false
-            ),
-            LeaderboardPlayer(
-                id = "2",
-                position = 1,
-                username = "sgsbpijd-64225d",
-                avatarUrl = "",
-                countryFlag = "🇺🇸",
-                roseCount = 20,
-                xp = 0,
-                isFollowing = false
-            ),
-            LeaderboardPlayer(
-                id = "3",
-                position = 1,
-                username = "ihmgvgsg-663b57",
-                avatarUrl = "",
-                countryFlag = "🇬🇧",
-                roseCount = 20,
-                xp = 0,
-                isFollowing = false
-            ),
-            LeaderboardPlayer(
-                id = "4",
-                position = 1,
-                username = "cristina-1e51cb",
-                avatarUrl = "",
-                countryFlag = "🇧🇷",
-                roseCount = 20,
-                xp = 0,
-                isFollowing = false
-            ),
-            LeaderboardPlayer(
-                id = "5",
-                position = 1,
-                username = "zohaib-046018",
-                avatarUrl = "",
-                countryFlag = "🇵🇰",
-                roseCount = 20,
-                xp = 0,
-                isFollowing = false
-            )
-        )
     }
 }

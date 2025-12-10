@@ -1,6 +1,8 @@
 package com.superhuman.livesustainably.map
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,9 +14,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +43,7 @@ fun MapView(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
+    var useSimulatedMap by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -82,29 +89,10 @@ fun MapView(
                     modifier = Modifier.align(Alignment.Center),
                     color = Color(0xFF2563EB)
                 )
-            } else if (state.error != null) {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = "Error",
-                        tint = Color(0xFFEF4444),
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = state.error ?: "Unknown error",
-                        color = Color(0xFF6B7280)
-                    )
-                }
-            } else {
+            } else if (state.error != null || useSimulatedMap) {
                 if (isLandscape) {
                     Row(modifier = Modifier.fillMaxSize()) {
-                        MapContent(
+                        SimulatedMapContent(
                             state = state,
                             onFriendClick = { viewModel.selectFriend(it) },
                             modifier = Modifier.weight(0.6f)
@@ -117,30 +105,54 @@ fun MapView(
                         )
                     }
                 } else {
-                    MapContent(
+                    SimulatedMapContent(
                         state = state,
                         onFriendClick = { viewModel.selectFriend(it) },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-
-                if (!isLandscape) {
-                    FriendsCountBadge(
-                        count = state.friends.count { it.status == "active" },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                    )
-
-                    state.selectedFriend?.let { friend ->
-                        FriendDetailCard(
-                            friend = friend,
-                            onDismiss = { viewModel.dismissFriendCard() },
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp)
+            } else {
+                if (isLandscape) {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        GoogleMapContent(
+                            state = state,
+                            onFriendClick = { viewModel.selectFriend(it) },
+                            onMapError = { useSimulatedMap = true },
+                            modifier = Modifier.weight(0.6f)
+                        )
+                        FriendsListPanel(
+                            friends = state.friends,
+                            selectedFriend = state.selectedFriend,
+                            onFriendClick = { viewModel.selectFriend(it) },
+                            modifier = Modifier.weight(0.4f)
                         )
                     }
+                } else {
+                    GoogleMapContent(
+                        state = state,
+                        onFriendClick = { viewModel.selectFriend(it) },
+                        onMapError = { useSimulatedMap = true },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+
+            if (!isLandscape) {
+                FriendsCountBadge(
+                    count = state.friends.count { it.status == "active" },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                )
+
+                state.selectedFriend?.let { friend ->
+                    FriendDetailCard(
+                        friend = friend,
+                        onDismiss = { viewModel.dismissFriendCard() },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    )
                 }
             }
         }
@@ -148,9 +160,10 @@ fun MapView(
 }
 
 @Composable
-fun MapContent(
+fun GoogleMapContent(
     state: MapState,
     onFriendClick: (Friend) -> Unit,
+    onMapError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val cameraPositionState = rememberCameraPositionState {
@@ -160,6 +173,14 @@ fun MapContent(
         )
     }
 
+    var mapLoadError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mapLoadError) {
+        if (mapLoadError) {
+            onMapError()
+        }
+    }
+
     GoogleMap(
         modifier = modifier,
         cameraPositionState = cameraPositionState,
@@ -167,7 +188,8 @@ fun MapContent(
         uiSettings = MapUiSettings(
             zoomControlsEnabled = true,
             myLocationButtonEnabled = false
-        )
+        ),
+        onMapLoaded = { },
     ) {
         Marker(
             state = MarkerState(
@@ -198,6 +220,261 @@ fun MapContent(
                     onFriendClick(friend)
                     true
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun SimulatedMapContent(
+    state: MapState,
+    onFriendClick: (Friend) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFE8F4EA),
+                        Color(0xFFD4E8D7),
+                        Color(0xFFC5DCC8)
+                    )
+                )
+            )
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+
+            drawLine(
+                color = Color(0xFFB8D4BC),
+                start = Offset(0f, height * 0.3f),
+                end = Offset(width, height * 0.35f),
+                strokeWidth = 3f
+            )
+            drawLine(
+                color = Color(0xFFB8D4BC),
+                start = Offset(0f, height * 0.6f),
+                end = Offset(width, height * 0.55f),
+                strokeWidth = 3f
+            )
+            drawLine(
+                color = Color(0xFFB8D4BC),
+                start = Offset(width * 0.3f, 0f),
+                end = Offset(width * 0.35f, height),
+                strokeWidth = 3f
+            )
+            drawLine(
+                color = Color(0xFFB8D4BC),
+                start = Offset(width * 0.7f, 0f),
+                end = Offset(width * 0.65f, height),
+                strokeWidth = 3f
+            )
+
+            val roadColor = Color(0xFFF5F5F5)
+            val roadWidth = 20f
+
+            drawLine(
+                color = roadColor,
+                start = Offset(0f, height * 0.4f),
+                end = Offset(width, height * 0.4f),
+                strokeWidth = roadWidth
+            )
+            drawLine(
+                color = roadColor,
+                start = Offset(0f, height * 0.7f),
+                end = Offset(width, height * 0.7f),
+                strokeWidth = roadWidth
+            )
+            drawLine(
+                color = roadColor,
+                start = Offset(width * 0.25f, 0f),
+                end = Offset(width * 0.25f, height),
+                strokeWidth = roadWidth
+            )
+            drawLine(
+                color = roadColor,
+                start = Offset(width * 0.6f, 0f),
+                end = Offset(width * 0.6f, height),
+                strokeWidth = roadWidth
+            )
+
+            val waterColor = Color(0xFF87CEEB).copy(alpha = 0.5f)
+            val path = Path().apply {
+                moveTo(width * 0.8f, 0f)
+                cubicTo(
+                    width * 0.85f, height * 0.3f,
+                    width * 0.75f, height * 0.5f,
+                    width * 0.9f, height
+                )
+                lineTo(width, height)
+                lineTo(width, 0f)
+                close()
+            }
+            drawPath(path, waterColor)
+
+            drawCircle(
+                color = Color(0xFF98D8AA),
+                radius = 40f,
+                center = Offset(width * 0.15f, height * 0.2f)
+            )
+            drawCircle(
+                color = Color(0xFF98D8AA),
+                radius = 30f,
+                center = Offset(width * 0.45f, height * 0.15f)
+            )
+            drawCircle(
+                color = Color(0xFF98D8AA),
+                radius = 35f,
+                center = Offset(width * 0.1f, height * 0.85f)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = (-20).dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2563EB))
+            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2563EB).copy(alpha = 0.2f))
+                    .align(Alignment.Center)
+            )
+        }
+
+        state.friends.forEachIndexed { index, friend ->
+            val xOffset = when (index % 4) {
+                0 -> 0.2f
+                1 -> 0.4f
+                2 -> 0.7f
+                else -> 0.3f
+            }
+            val yOffset = when (index % 3) {
+                0 -> 0.25f
+                1 -> 0.55f
+                else -> 0.8f
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                FriendMarker(
+                    friend = friend,
+                    onClick = { onFriendClick(friend) },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(
+                            x = (xOffset * 300 + index * 30).dp,
+                            y = (yOffset * 400 + index * 20).dp
+                        )
+                )
+            }
+        }
+
+        Card(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f))
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = Color(0xFF2563EB),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Simulated Map (No API Key)",
+                    fontSize = 14.sp,
+                    color = Color(0xFF1F2937)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendMarker(
+    friend: Friend,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val markerColor = if (friend.status == "active") Color(0xFF10B981) else Color(0xFFF59E0B)
+
+    Column(
+        modifier = modifier.clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(markerColor)
+                .padding(3.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (friend.avatarUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = friend.avatarUrl,
+                    contentDescription = friend.name,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = markerColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+        Canvas(modifier = Modifier.size(10.dp, 8.dp)) {
+            val path = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(size.width, 0f)
+                lineTo(size.width / 2, size.height)
+                close()
+            }
+            drawPath(path, markerColor)
+        }
+        Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = Color.White,
+            shadowElevation = 2.dp
+        ) {
+            Text(
+                text = friend.name.split(" ").first(),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF1F2937),
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
     }

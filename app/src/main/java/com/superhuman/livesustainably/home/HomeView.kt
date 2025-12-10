@@ -67,7 +67,17 @@ fun HomeView(
             HeaderSection(
                 streakCount = state.streakCount,
                 starCount = state.starCount,
-                roseCount = state.roseCount
+                roseCount = state.roseCount,
+                onStartClick = {
+                    val firstActivity = state.activities.firstOrNull { !it.isCompleted }
+                    firstActivity?.let {
+                        when (it.id) {
+                            "stories" -> onNavigateToFeed()
+                            "mobility" -> onNavigateToMap()
+                            else -> onNavigateToActivity(it.id)
+                        }
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -95,7 +105,8 @@ fun HomeView(
 fun HeaderSection(
     streakCount: Int,
     starCount: Int,
-    roseCount: Int
+    roseCount: Int,
+    onStartClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -167,9 +178,9 @@ fun HeaderSection(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Start Button BELOW the Row
+            // Start Button BELOW the Row - navigates to first incomplete activity
             Button(
-                onClick = { /* Handle start action */ },
+                onClick = onStartClick,
                 modifier = Modifier
                     .height(40.dp)
                     .widthIn(min = 120.dp),

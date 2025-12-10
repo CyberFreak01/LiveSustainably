@@ -1,0 +1,44 @@
+{
+  "weeklyStats": {
+    "co2Saved": 45.2,
+    "transportTrips": 12,
+    "bikeKm": 28.5,
+    "walkKm": 15.3,
+    "publicTransportTrips": 8,
+    "carTripsAvoided": 5,
+    "sustainableMeals": 18,
+    "recycledItems": 24,
+    "waterSaved": 120.5
+  },
+  "monthlyStats": {
+    "co2Saved": 185.8,
+    "transportTrips": 48,
+    "bikeKm": 112.0,
+    "walkKm": 62.5,
+    "publicTransportTrips": 32,
+    "carTripsAvoided": 22,
+    "sustainableMeals": 75,
+    "recycledItems": 98,
+    "waterSaved": 480.0
+  },
+  "dailyData": [
+    {"day": "Mon", "co2": 6.2, "transport": 2},
+    {"day": "Tue", "co2": 7.8, "transport": 3},
+    {"day": "Wed", "co2": 5.5, "transport": 1},
+    {"day": "Thu", "co2": 8.1, "transport": 2},
+    {"day": "Fri", "co2": 6.9, "transport": 2},
+    {"day": "Sat", "co2": 5.2, "transport": 1},
+    {"day": "Sun", "co2": 5.5, "transport": 1}
+  ],
+  "transportBreakdown": [
+    {"type": "Bike", "percentage": 35, "color": "#10B981"},
+    {"type": "Walk", "percentage": 25, "color": "#3B82F6"},
+    {"type": "Public Transport", "percentage": 30, "color": "#8B5CF6"},
+    {"type": "Electric", "percentage": 10, "color": "#F59E0B"}
+  ],
+  "achievements": [
+    {"title": "Week Streak", "value": "7 days", "icon": "streak"},
+    {"title": "Top 10%", "value": "Leaderboard", "icon": "trophy"},
+    {"title": "Tree Saver", "value": "2 trees", "icon": "tree"}
+  ]
+}

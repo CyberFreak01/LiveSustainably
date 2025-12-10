@@ -39,6 +39,7 @@ fun ProfileView(
     onNavigateToHome: () -> Unit = {},
     onNavigateToChat: () -> Unit = {},
     onNavigateToLeaderboard: () -> Unit = {},
+    onNavigateToReport: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -164,6 +165,7 @@ fun ProfileView(
                 ) {
                     ProfileHeader(user = state.user)
                     StatsSection(stats = state.user?.stats)
+                    ReportButton(onClick = onNavigateToReport)
                     AchievementsSection(achievements = state.achievements)
                     SettingsSection(state = state, viewModel = viewModel)
                     Spacer(modifier = Modifier.height(16.dp))
@@ -591,6 +593,41 @@ fun SettingsSwitch(
                 uncheckedTrackColor = Color(0xFFE5E7EB)
             )
         )
+    }
+}
+
+@Composable
+fun ReportButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF10B981)
+        )
+    ) {
+        Icon(
+            imageVector = Icons.Default.DateRange,
+            contentDescription = null,
+            tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = "View Sustainability Report",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Text(
+                text = "Weekly & Monthly CO₂ savings",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 12.sp
+            )
+        }
     }
 }
 

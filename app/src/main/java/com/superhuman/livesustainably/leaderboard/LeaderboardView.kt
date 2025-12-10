@@ -1,5 +1,6 @@
 package com.superhuman.livesustainably.leaderboard
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,10 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -53,30 +52,96 @@ fun LeaderboardView(
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Header Section
-            LeaderboardHeaderSection(
-                userPosition = state.userPosition,
-                leagueName = state.leagueName,
-                leagueSubtitle = state.leagueSubtitle,
-                timeRemaining = state.timeRemaining,
-                streakCount = state.streakCount,
-                starCount = state.starCount,
-                roseCount = state.roseCount,
-                lockedLeagues = state.lockedLeagues
-            )
+            item {
+                LeaderboardHeaderSection(
+                    userPosition = state.userPosition,
+                    leagueName = state.leagueName,
+                    leagueSubtitle = state.leagueSubtitle,
+                    timeRemaining = state.timeRemaining,
+                    streakCount = state.streakCount,
+                    starCount = state.starCount,
+                    roseCount = state.roseCount,
+                    lockedLeagues = state.lockedLeagues
+                )
+            }
 
-            // Leaderboard List
-            LeaderboardList(
-                players = state.players,
-                onFollowClick = { playerId ->
-                    viewModel.toggleFollow(playerId)
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Position",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF9CA3AF)
+                    )
+                    Text(
+                        text = "Points",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF9CA3AF)
+                    )
                 }
-            )
+            }
+
+            item {
+                if (state.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF2563EB))
+                    }
+                }
+            }
+
+            itemsIndexed(
+                items = state.players,
+                key = { _, player -> player.id }
+            ) { index, player ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(
+                            top = if (index == 0) 0.dp else 0.dp,
+                            bottom = if (index == state.players.size - 1) 24.dp else 0.dp
+                        )
+                        .animateContentSize(),
+                    shape = when {
+                        state.players.size == 1 -> RoundedCornerShape(20.dp)
+                        index == 0 -> RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                        index == state.players.size - 1 -> RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+                        else -> RoundedCornerShape(0.dp)
+                    },
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (index == 0 || index == state.players.size - 1) 2.dp else 0.dp
+                    )
+                ) {
+                    LeaderboardPlayerItem(
+                        player = player,
+                        isTopThree = player.position <= 3,
+                        onFollowClick = { viewModel.toggleFollow(player.id) }
+                    )
+                    if (index < state.players.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = Color(0xFFE5E7EB)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -119,7 +184,6 @@ fun LeaderboardHeaderSection(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Stats Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -134,13 +198,11 @@ fun LeaderboardHeaderSection(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // League Badges Row with locked icons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Current League Badge (unlocked with seed icon)
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -148,7 +210,6 @@ fun LeaderboardHeaderSection(
                         .background(Color(0xFFFFE4B5)),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Add seed icon here
                     Icon(
                         painter = painterResource(id = R.drawable.seed_icon),
                         contentDescription = "Seed",
@@ -159,7 +220,6 @@ fun LeaderboardHeaderSection(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Locked leagues
                 repeat(lockedLeagues) {
                     Box(
                         modifier = Modifier
@@ -183,7 +243,6 @@ fun LeaderboardHeaderSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // League Name
             Text(
                 text = leagueName,
                 fontSize = 28.sp,
@@ -194,7 +253,6 @@ fun LeaderboardHeaderSection(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // League Subtitle
             Text(
                 text = leagueSubtitle,
                 fontSize = 16.sp,
@@ -204,9 +262,8 @@ fun LeaderboardHeaderSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // How does it work? button
             TextButton(
-                onClick = { /* Show explanation dialog */ },
+                onClick = { },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = Color.White
                 )
@@ -226,7 +283,6 @@ fun LeaderboardHeaderSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Time Remaining Badge
             Surface(
                 shape = RoundedCornerShape(24.dp),
                 color = Color.White
@@ -236,7 +292,7 @@ fun LeaderboardHeaderSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.DateRange, //Timer Image
+                        imageVector = Icons.Default.DateRange,
                         contentDescription = "Timer",
                         tint = Color(0xFF2563EB),
                         modifier = Modifier.size(20.dp)
@@ -281,90 +337,51 @@ fun StatBadge(icon: String, count: Int) {
 }
 
 @Composable
-fun LeaderboardList(
-    players: List<LeaderboardPlayer>,
-    onFollowClick: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        // Position and Points header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Position",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF9CA3AF)
-            )
-            Text(
-                text = "Points",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF9CA3AF)
-            )
-        }
-
-        // Player List
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                players.forEachIndexed { index, player ->
-                    LeaderboardPlayerItem(
-                        player = player,
-                        onFollowClick = { onFollowClick(player.id) }
-                    )
-                    if (index < players.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = Color(0xFFE5E7EB)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun LeaderboardPlayerItem(
     player: LeaderboardPlayer,
+    isTopThree: Boolean = false,
     onFollowClick: () -> Unit
 ) {
+    val positionColor = when (player.position) {
+        1 -> Color(0xFFFFD700)
+        2 -> Color(0xFFC0C0C0)
+        3 -> Color(0xFFCD7F32)
+        else -> Color(0xFF1F2937)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Position
-        Text(
-            text = player.position.toString(),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1F2937),
-            modifier = Modifier.width(30.dp)
-        )
+        Box(
+            modifier = Modifier.width(30.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isTopThree) {
+                Text(
+                    text = when (player.position) {
+                        1 -> "🥇"
+                        2 -> "🥈"
+                        3 -> "🥉"
+                        else -> player.position.toString()
+                    },
+                    fontSize = 20.sp
+                )
+            } else {
+                Text(
+                    text = player.position.toString(),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = positionColor
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Avatar
-        Box(
-            modifier = Modifier.size(48.dp)
-        ) {
-            // Avatar Image
+        Box(modifier = Modifier.size(48.dp)) {
             if (player.avatarUrl.isNotEmpty()) {
                 AsyncImage(
                     model = player.avatarUrl,
@@ -375,23 +392,28 @@ fun LeaderboardPlayerItem(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // Placeholder avatar
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(Color(0xFFE5E7EB)),
+                        .background(
+                            when (player.position) {
+                                1 -> Color(0xFFFFF3CD)
+                                2 -> Color(0xFFE8E8E8)
+                                3 -> Color(0xFFFFE5D0)
+                                else -> Color(0xFFE5E7EB)
+                            }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Avatar",
-                        tint = Color(0xFF9CA3AF)
+                        tint = positionColor.copy(alpha = 0.7f)
                     )
                 }
             }
 
-            // Country flag badge (bottom-left corner)
             if (player.countryFlag.isNotEmpty()) {
                 Text(
                     text = player.countryFlag,
@@ -409,10 +431,7 @@ fun LeaderboardPlayerItem(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Username and Rose Count
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = player.username,
                 fontSize = 16.sp,
@@ -420,9 +439,7 @@ fun LeaderboardPlayerItem(
                 color = Color(0xFF1F2937)
             )
             if (player.roseCount > 0) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "🌹", fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -435,11 +452,10 @@ fun LeaderboardPlayerItem(
             }
         }
 
-        // Follow Button
         TextButton(
             onClick = onFollowClick,
             colors = ButtonDefaults.textButtonColors(
-                contentColor = Color(0xFF2563EB)
+                contentColor = if (player.isFollowing) Color(0xFF10B981) else Color(0xFF2563EB)
             )
         ) {
             Text(
@@ -451,7 +467,6 @@ fun LeaderboardPlayerItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // XP Points
         Text(
             text = "${player.xp} XP",
             fontSize = 16.sp,
@@ -460,10 +475,6 @@ fun LeaderboardPlayerItem(
         )
     }
 }
-
-// ============================================
-// Data Classes and ViewModel
-// ============================================
 
 data class LeaderboardPlayer(
     val id: String,

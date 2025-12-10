@@ -14,75 +14,119 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #6ba32d 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 700px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            margin: 0 auto;
         }
         .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         .app-icon {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, #4CAF50, #8BC34A);
-            border-radius: 22px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 50px;
+            margin: 0 auto 15px;
+            font-size: 40px;
         }
         h1 {
             color: #2d5016;
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 8px;
         }
         .badge {
             display: inline-block;
             background: #e8f5e9;
             color: #2d5016;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
         }
-        .section {
-            margin-top: 25px;
+        .description {
+            margin-top: 15px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
         }
-        .section h2 {
-            color: #333;
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: #1f2937;
             font-size: 18px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #e8f5e9;
+        }
+        .change-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .change-item:last-child {
+            border-bottom: none;
+        }
+        .change-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .change-icon.auth { background: #dbeafe; }
+        .change-icon.home { background: #fef3c7; }
+        .change-icon.leaderboard { background: #dcfce7; }
+        .change-icon.report { background: #f3e8ff; }
+        .change-icon.map { background: #e0f2fe; }
+        .change-content h3 {
+            font-size: 15px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .change-content p {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
         }
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 12px;
         }
         .feature {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 10px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
             text-align: center;
         }
         .feature-icon {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 8px;
         }
         .feature-name {
             font-size: 13px;
-            color: #555;
+            color: #374151;
+            font-weight: 500;
         }
         .tech-stack {
             display: flex;
@@ -92,19 +136,18 @@
         .tech {
             background: #e3f2fd;
             color: #1565c0;
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 6px;
             font-size: 12px;
         }
         .notice {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 15px;
-            border-radius: 0 8px 8px 0;
-            margin-top: 25px;
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+            padding: 16px;
+            border-radius: 0 12px 12px 0;
         }
         .notice h3 {
-            color: #e65100;
+            color: #c2410c;
             font-size: 14px;
             margin-bottom: 8px;
         }
@@ -114,25 +157,30 @@
             line-height: 1.6;
         }
         .instructions {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+        .instructions h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #1f2937;
         }
         .instructions ol {
-            margin-left: 20px;
+            margin-left: 18px;
             color: #555;
         }
         .instructions li {
-            margin-bottom: 10px;
-            font-size: 14px;
+            margin-bottom: 8px;
+            font-size: 13px;
         }
         code {
             background: #e8e8e8;
             padding: 2px 8px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 13px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -141,10 +189,58 @@
         <div class="header">
             <div class="app-icon">🌱</div>
             <h1>Live Sustainably</h1>
-            <span class="badge">Native Android App</span>
+            <span class="badge">Native Android App - Kotlin</span>
+            <p class="description">
+                Make smarter choices every day, travel in eco-friendly ways, eat healthy and planet-friendly food, 
+                and shop responsibly. Track your daily CO2e savings and see how your impact compares with friends.
+            </p>
         </div>
 
-        <div class="section">
+        <div class="card">
+            <h2>Recent Changes Implemented</h2>
+            
+            <div class="change-item">
+                <div class="change-icon auth">🔐</div>
+                <div class="change-content">
+                    <h3>Authentication Updates</h3>
+                    <p>Removed Apple signup button. Facebook and SSO buttons now show "Coming soon" snackbar when tapped.</p>
+                </div>
+            </div>
+            
+            <div class="change-item">
+                <div class="change-icon home">🏠</div>
+                <div class="change-content">
+                    <h3>Interactive Start Button</h3>
+                    <p>The START button in HomeView header is now interactive - it navigates to the first incomplete activity.</p>
+                </div>
+            </div>
+            
+            <div class="change-item">
+                <div class="change-icon leaderboard">🏆</div>
+                <div class="change-content">
+                    <h3>Enhanced Leaderboard</h3>
+                    <p>Made fully scrollable with LazyColumn, loads data from JSON, expanded to 20 players with realistic data, added medals for top 3.</p>
+                </div>
+            </div>
+            
+            <div class="change-item">
+                <div class="change-icon report">📊</div>
+                <div class="change-content">
+                    <h3>New Report Dashboard</h3>
+                    <p>Added sustainability report page with weekly/monthly filters, CO2 savings chart, transport breakdown pie chart, key metrics grid, and achievements.</p>
+                </div>
+            </div>
+            
+            <div class="change-item">
+                <div class="change-icon map">🗺️</div>
+                <div class="change-content">
+                    <h3>Simulated Map View</h3>
+                    <p>Replaced Google Maps with a simulated map that shows roads, parks, water, and friend markers. No API key required.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
             <h2>App Features</h2>
             <div class="features">
                 <div class="feature">
@@ -165,41 +261,53 @@
                 </div>
                 <div class="feature">
                     <div class="feature-icon">🗺️</div>
-                    <div class="feature-name">Maps</div>
+                    <div class="feature-name">Friend Map</div>
                 </div>
                 <div class="feature">
                     <div class="feature-icon">👤</div>
                     <div class="feature-name">Profiles</div>
                 </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-name">Reports</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <div class="feature-name">CO2 Tracking</div>
+                </div>
             </div>
         </div>
 
-        <div class="section">
+        <div class="card">
             <h2>Technology Stack</h2>
             <div class="tech-stack">
                 <span class="tech">Kotlin</span>
                 <span class="tech">Jetpack Compose</span>
-                <span class="tech">Firebase</span>
-                <span class="tech">Google Maps</span>
-                <span class="tech">Hilt</span>
+                <span class="tech">Firebase Auth</span>
+                <span class="tech">Firebase Firestore</span>
+                <span class="tech">Hilt DI</span>
                 <span class="tech">Ktor</span>
                 <span class="tech">Material 3</span>
+                <span class="tech">Coil</span>
+                <span class="tech">Coroutines</span>
             </div>
         </div>
 
-        <div class="notice">
-            <h3>Android App - Cannot Run in Browser</h3>
-            <p>This is a native Android application built with Kotlin and Jetpack Compose. It requires Android Studio and an Android device or emulator to run. The source code is available in this repository for viewing and editing.</p>
-        </div>
-
-        <div class="instructions">
-            <h2 style="margin-bottom: 15px; font-size: 16px;">To Run This App:</h2>
-            <ol>
-                <li>Clone this repository to your local machine</li>
-                <li>Open in <strong>Android Studio</strong></li>
-                <li>Sync Gradle files</li>
-                <li>Run on an emulator or Android device (Android 10+)</li>
-            </ol>
+        <div class="card">
+            <div class="notice">
+                <h3>Native Android App - Cannot Run in Browser</h3>
+                <p>This is a native Android application built with Kotlin and Jetpack Compose. It requires Android Studio and an Android device or emulator to run. The source code is available in this repository for viewing and editing.</p>
+            </div>
+            
+            <div class="instructions">
+                <h3>To Run This App Locally:</h3>
+                <ol>
+                    <li>Clone this repository to your local machine</li>
+                    <li>Open in <strong>Android Studio</strong> (Arctic Fox or later)</li>
+                    <li>Sync Gradle files</li>
+                    <li>Run on an emulator or Android device (Android 10+)</li>
+                </ol>
+            </div>
         </div>
     </div>
 </body>
