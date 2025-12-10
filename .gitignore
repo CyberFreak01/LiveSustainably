@@ -1,3 +1,4 @@
+# Android Studio/Gradle
 *.iml
 .gradle
 /local.properties
@@ -13,3 +14,36 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Kotlin
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Keystore file
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+
+# Proguard
+/app/proguard/mapping.txt
+/app/proguard/seeds.txt
+/app/proguard/usage.txt
+
+# Hilt
+/app/build/generated/hilt
+
+# KSP
+/app/build/generated/ksp
+
+# Private files
+private.properties
+
+# Built files
+*.apk
+*.aab

@@ -1,0 +1,24 @@
+{
+  "feeds": [
+{
+"id": "1",
+"authorName": "Dr. Jane Goodall",
+"authorAvatar": "",
+"timestamp": "2 hours ago",
+"category": "Wildlife",
+"title": "Protecting Our Forests: A Critical Mission",
+"description": "Forests are the lungs of our planet. Every tree we save contributes to a healthier Earth.",
+"imageUrl": "",
+"likeCount": 234,
+"isLiked": false,
+"comments": [
+{
+"id": "c1",
+"authorName": "Sarah Miller",
+"text": "This is so important!",
+"timestamp": "1 hour ago"
+}
+]
+}
+]
+}

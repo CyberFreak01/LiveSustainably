@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.superhuman.livesustainably.auth.AuthView
 import com.superhuman.livesustainably.auth.SignUpView
+import com.superhuman.livesustainably.feed.FeedView
 import com.superhuman.livesustainably.home.HomeView
 import com.superhuman.livesustainably.leaderboard.LeaderboardView
 
@@ -20,6 +21,7 @@ sealed class NavDestinations(val route: String) {
     object SignUp : NavDestinations("signup")
     object Home : NavDestinations("home")
     object Leaderboard : NavDestinations("leaderboard")
+    object Feed : NavDestinations("feed")
 }
 
 @Composable
@@ -49,6 +51,9 @@ fun AppNavigator(navController: NavHostController, authState: AppAuthState) {
             HomeView(
                 onNavigateToLeaderboard = {
                     navController.navigate(NavDestinations.Leaderboard.route)
+                },
+                onNavigateToFeed = {
+                    navController.navigate(NavDestinations.Feed.route)
                 }
             )
         }
@@ -57,6 +62,11 @@ fun AppNavigator(navController: NavHostController, authState: AppAuthState) {
                 onNavigateToHome = { navController.navigate(NavDestinations.Home.route) },
                 onNavigateToMissions = { navController.navigate(NavDestinations.Leaderboard.route) },
                 onNavigateToProfile = { /* TODO: Add profile screen */ }
+            )
+        }
+        composable(NavDestinations.Feed.route) {
+            FeedView(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

@@ -36,7 +36,8 @@ import com.superhuman.livesustainably.R
 fun HomeView(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToActivity: (String) -> Unit = {},
-    onNavigateToLeaderboard: () -> Unit = {}
+    onNavigateToLeaderboard: () -> Unit = {},
+    onNavigateToFeed: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -71,7 +72,8 @@ fun HomeView(
             // Today's Activities Section
             TodaysActivitiesSection(
                 activities = state.activities,
-                onActivityClick = onNavigateToActivity
+                onActivityClick = onNavigateToActivity,
+                onNavigateToFeed = onNavigateToFeed
             )
         }
     }
@@ -338,7 +340,8 @@ fun StreakDayItem(
 @Composable
 fun TodaysActivitiesSection(
     activities: List<Activity>,
-    onActivityClick: (String) -> Unit
+    onActivityClick: (String) -> Unit,
+    onNavigateToFeed: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -367,7 +370,13 @@ fun TodaysActivitiesSection(
                         ActivityCard(
                             activity = activity,
                             modifier = Modifier.weight(1f),
-                            onClick = { onActivityClick(activity.id) }
+                            onClick = {
+                                if (activity.id == "stories") {
+                                    onNavigateToFeed()
+                                } else {
+                                    onActivityClick(activity.id)
+                                }
+                            }
                         )
                     }
                     // Fill empty space if odd number
@@ -392,7 +401,7 @@ fun ActivityCard(
     Card(
         onClick = onClick,
         modifier = modifier
-            .height(200.dp),
+            .height(180.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -402,89 +411,99 @@ fun ActivityCard(
         )
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .clip(RoundedCornerShape(24.dp))
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                // Header with icon and notification dot
+
+                // ---------- HEADER ROW ----------
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Activity icon background
+
+                    // Left circular icon
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFF3F4F6)),
+                            .background(Color(0xFFFFF6ED)),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Note: Add activity icons to res/drawable
-                        // For now using placeholder
                         Image(
                             painter = painterResource(id = activity.iconRes),
                             contentDescription = activity.title,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
-                    // Notification dot
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    // Title
+                    Text(
+                        text = activity.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1F2937),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Notification Dot
                     if (activity.hasNotification) {
                         Box(
                             modifier = Modifier
-                                .size(12.dp)
+                                .size(14.dp)
                                 .clip(CircleShape)
                                 .background(Color(0xFFEF4444))
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = activity.title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Activity Image
-                Image(
-                    painter = painterResource(id = activity.imageRes),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
-            // XP Badge at bottom
+            // ---------- BOTTOM-LEFT IMAGE (2/3 visible) ----------
+            Image(
+                painter = painterResource(id = activity.imageRes),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.BottomStart)
+                    .offset(x = (-20).dp, y = 20.dp)  // pushes image partially outside (like screenshot)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            // ---------- XP BADGE OVERLAY ----------
             Surface(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
+                    .align(Alignment.BottomStart)
+                    .offset(x = 60.dp, y = (-10).dp), // overlaps image bottom-right
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF2563EB)
+                color = Color(0xFF0EA5E9),
+                shadowElevation = 6.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     Text(
-                        text = "+${activity.xp} xp",
+                        text = "+${activity.xp} XP",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         contentDescription = null,
@@ -494,9 +513,9 @@ fun ActivityCard(
                 }
             }
         }
+
     }
 }
-
 @Composable
 fun BottomNavigationBar(onNavigateToLeaderboard: () -> Unit) {
     NavigationBar(
